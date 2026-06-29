@@ -387,12 +387,144 @@ def cmd_audit(svc, cfg):
 
 
 # --------------------------------------------------------------------------- #
+# Optional AI category suggestion (Claude / Gemini / OpenAI)
+# Uses stdlib HTTP only. Sends sender DOMAINS + counts (no email content).
+# API keys come from environment variables, never stored.
+# --------------------------------------------------------------------------- #
+import urllib.request
+import urllib.error
+
+AI_ENV = {"claude": "ANTHROPIC_API_KEY", "gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY"}
+
+AI_PROMPT = (
+    "You are organizing a Gmail inbox. Below is a list of email senders as "
+    "'domain | message_count'. Group them into sensible Gmail "
+    "label categories for inbox organization.\n\n"
+    "Rules:\n"
+    "- Return ONLY valid JSON, no prose, no markdown fences.\n"
+    "- Format EXACTLY: {\"LabelName\": {\"from\": [\"domain1\", \"domain2\"]}, ...}\n"
+    "- Use nested labels with '/' where helpful (e.g. \"Finance/Banking\", \"Career/Jobs\").\n"
+    "- Put genuinely unknown or one-off senders under \"UNSORTED\".\n"
+    "- Keep label names short and human-friendly.\n\n"
+    "Senders:\n{senders}\n"
+)
+
+
+def _http_post_json(url, headers, body, timeout=120):
+    data = json.dumps(body).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", "ignore")[:500]
+        raise RuntimeError(f"API HTTP {e.code}: {detail}")
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Network error: {e}")
+
+
+def _ai_call(provider, model, key, prompt):
+    if provider == "claude":
+        resp = _http_post_json(
+            "https://api.anthropic.com/v1/messages",
+            {"x-api-key": key, "anthropic-version": "2023-06-01",
+             "content-type": "application/json"},
+            {"model": model, "max_tokens": 4000,
+             "messages": [{"role": "user", "content": prompt}]},
+        )
+        return "".join(b.get("text", "") for b in resp.get("content", []))
+    if provider == "gemini":
+        resp = _http_post_json(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}",
+            {"content-type": "application/json"},
+            {"contents": [{"parts": [{"text": prompt}]}]},
+        )
+        return resp["candidates"][0]["content"]["parts"][0]["text"]
+    if provider == "openai":
+        resp = _http_post_json(
+            "https://api.openai.com/v1/chat/completions",
+            {"Authorization": f"Bearer {key}", "content-type": "application/json"},
+            {"model": model, "messages": [{"role": "user", "content": prompt}]},
+        )
+        return resp["choices"][0]["message"]["content"]
+    raise ValueError(f"Unknown provider: {provider}")
+
+
+def _extract_json(text):
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
+        text = re.sub(r"\n?```$", "", text).strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        a, b = text.find("{"), text.rfind("}")
+        if a != -1 and b != -1 and b > a:
+            return json.loads(text[a:b + 1])
+        raise
+
+
+def ai_suggest(cfg, provider):
+    """Group senders into categories using an LLM. Returns apply-ready dict."""
+    ai = cfg.get("ai", {})
+    if provider in (None, "config"):
+        provider = ai.get("provider", "claude")
+    if provider not in AI_ENV:
+        sys.exit(f"Unknown AI provider '{provider}'. Use one of: {', '.join(AI_ENV)}")
+    key = os.environ.get(AI_ENV[provider])
+    if not key:
+        sys.exit(f"Set your API key:  export {AI_ENV[provider]}=...   (provider: {provider})")
+    model = ai.get("models", {}).get(provider, "")
+    if not model:
+        sys.exit(f"No model configured for {provider} in config.json -> ai.models")
+
+    # Aggregate senders by domain (top N), send only domain + count (no names/content)
+    rows = list(csv.DictReader(open(SENDERS_CSV, encoding="utf-8")))
+    agg = {}
+    for r in rows:
+        d = r["domain"].lower()
+        if not d:
+            continue
+        agg[d] = agg.get(d, 0) + int(r["count"])
+    top = sorted(agg.items(), key=lambda x: -x[1])[: ai.get("max_senders", 300)]
+    lines = "\n".join(f"{d} | {c}" for d, c in top)
+
+    print(f"Asking {provider} ({model}) to categorize {len(top)} domains...")
+    text = _ai_call(provider, model, key, AI_PROMPT.replace("{senders}", lines))
+    data = _extract_json(text)
+    # normalize: ensure {label: {"from": [...]}}
+    out = {}
+    for label, val in data.items():
+        if isinstance(val, dict) and "from" in val:
+            doms = val["from"]
+        elif isinstance(val, list):
+            doms = val
+        else:
+            continue
+        out[label] = {"from": [str(x).lower() for x in doms if x]}
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # COMMAND: suggest  (propose categories for uncategorized senders)
 # --------------------------------------------------------------------------- #
-def cmd_suggest(cfg):
+def cmd_suggest(cfg, ai_provider=None):
     if not os.path.exists(SENDERS_CSV):
         sys.exit(f"Run 'audit' first to create {SENDERS_CSV}")
-    # domains already mapped
+
+    # AI path: let an LLM group senders (optional, opt-in)
+    if ai_provider is not None:
+        out = ai_suggest(cfg, ai_provider)
+        with open(SUGGEST_JSON, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=2)
+        n_un = len(out.get("UNSORTED", {}).get("from", []))
+        total = sum(len(v.get("from", [])) for v in out.values())
+        print(f"Wrote {SUGGEST_JSON}: {total} domains across {len(out)} categories "
+              f"({n_un} UNSORTED).")
+        print(f"Next: review it, save the categories you want as {CATEGORIES_PATH}, run 'apply'.")
+        return
+
+    # Heuristic path (no AI, no dependencies)
     mapped = set()
     for cat in cfg["categories"].values():
         for v in cat.get("from", []):
@@ -520,7 +652,11 @@ def main():
     p = argparse.ArgumentParser(description="Generic config-driven Gmail organizer")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("audit", help="scan account -> senders.csv, summary.txt")
-    sub.add_parser("suggest", help="propose categories for new senders")
+    sp = sub.add_parser("suggest", help="propose categories for new senders")
+    sp.add_argument("--ai", nargs="?", const="config", default=None,
+                    choices=["claude", "gemini", "openai", "config"],
+                    help="use an LLM to group senders (default provider from config). "
+                         "Needs ANTHROPIC_API_KEY / GEMINI_API_KEY / OPENAI_API_KEY in env.")
     ap = sub.add_parser("apply", help="create labels+filters, optionally label existing")
     ap.add_argument("--go", action="store_true", help="actually act (override dry_run)")
     ap.add_argument("--label-existing", action="store_true", help="also tag existing mail")
@@ -533,7 +669,7 @@ def main():
 
     cfg = load_config()
     if args.cmd == "suggest":
-        cmd_suggest(cfg); return
+        cmd_suggest(cfg, args.ai); return
     svc = get_service()
     if args.cmd == "audit":
         cmd_audit(svc, cfg)

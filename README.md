@@ -36,7 +36,11 @@ First run opens a browser to authorize. Scopes:
 ## Usage
 ```
 python gmail_organizer.py audit        # read-only -> senders.csv, summary.txt
-python gmail_organizer.py suggest       # -> suggested_categories.json (guesses for your senders)
+python gmail_organizer.py suggest       # -> suggested_categories.json (keyword guesses)
+
+# OR let an LLM group your senders (optional):
+python gmail_organizer.py suggest --ai            # uses the provider set in config.json
+python gmail_organizer.py suggest --ai claude     # or: gemini / openai
 
 # review suggested_categories.json: rename/merge buckets, DELETE the UNSORTED bucket,
 # then save the categories you want as categories.json
@@ -52,6 +56,27 @@ python gmail_organizer.py apply --go --label-existing --existing-limit 200   # s
 python gmail_organizer.py apply --go --label-existing                        # full, label-only
 python gmail_organizer.py apply --go --label-existing --archive              # also skip the inbox
 ```
+
+## AI category generation (optional)
+`suggest` works with no API keys using keyword heuristics. If you'd rather have an
+LLM group your senders, add `--ai`:
+```
+python gmail_organizer.py suggest --ai          # provider from config.json (default: claude)
+python gmail_organizer.py suggest --ai gemini    # claude | gemini | openai
+```
+Set the matching API key in your environment first:
+```
+export ANTHROPIC_API_KEY=...   # for --ai claude
+export GEMINI_API_KEY=...       # for --ai gemini
+export OPENAI_API_KEY=...       # for --ai openai
+```
+- **Privacy:** only your sender **domains and message counts** are sent to the
+  provider — never email content, subjects, sender names, or your address.
+- Models are configurable under `ai.models` in `config.json`; update them as
+  providers release new versions.
+- Output is the same `suggested_categories.json` you review and save as
+  `categories.json`. The AI never applies anything — you stay in control.
+- Uses only the Python standard library (no extra dependencies for HTTP).
 
 ## `categories.json`
 Your account-specific mapping. Each entry is `LabelName: { matcher }`:

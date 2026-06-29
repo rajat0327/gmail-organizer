@@ -183,5 +183,16 @@
     ]
   },
   "_categories_note": "Account categories live in categories.json (generate via 'suggest', then edit). This stays empty on purpose.",
-  "_about": "Generic config-driven Gmail organizer. Edit categories.json (per account); this file is the reusable engine."
+  "_about": "Generic config-driven Gmail organizer. Edit categories.json (per account); this file is the reusable engine.",
+  "ai": {
+    "enabled": false,
+    "provider": "claude",
+    "max_senders": 300,
+    "models": {
+      "claude": "claude-sonnet-4-6",
+      "gemini": "gemini-2.5-flash",
+      "openai": "gpt-4o-mini"
+    },
+    "_note": "Optional. 'suggest --ai' groups senders via an LLM. Needs an API key in env: ANTHROPIC_API_KEY / GEMINI_API_KEY / OPENAI_API_KEY. Only sender domains + counts are sent, never email content, names, or your address. Update model names here as providers release new ones."
+  }
 }
