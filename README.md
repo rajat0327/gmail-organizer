@@ -13,7 +13,8 @@ No personal data ships with this tool — you define your own categories.
 
 ## Features
 - Audit any inbox into a ranked sender/domain report (read-only).
-- Auto-suggest categories for unknown senders via editable keyword heuristics.
+- Auto-suggest categories offline using curated domain-knowledge packs plus keyword heuristics — no AI required.
+- Optional AI suggestion (Claude / Gemini / OpenAI) that only ever sees domains + counts.
 - Create nested labels + filters from a simple JSON mapping.
 - Optionally back-apply labels (and archiving) to existing mail, in batches.
 - A "never miss a bill" keeper: stars bill/statement mail and keeps it in the inbox.
@@ -56,6 +57,28 @@ python gmail_organizer.py apply --go --label-existing --existing-limit 200   # s
 python gmail_organizer.py apply --go --label-existing                        # full, label-only
 python gmail_organizer.py apply --go --label-existing --archive              # also skip the inbox
 ```
+
+## Offline domain knowledge (no AI needed)
+`suggest` categorizes senders **without any API** using two layers:
+1. **Domain knowledge packs** (`domains/*.json`) — curated `category → [domains]`
+   lists, matched precisely (exact or suffix, so `alerts.hdfcbank.com` matches
+   `hdfcbank.com`). This is accurate and deterministic.
+2. **Keyword heuristics** (`config.json`) — fuzzy fallback for domains not in any pack.
+3. Anything still unmatched goes to `UNSORTED` for you to sort by hand.
+
+Ships with `domains/global.json` (worldwide brands), `domains/in.json` (India:
+banks, brokers, fintech, gov, telecom, e-commerce, edu, jobs), and
+`domains/us.json` (US: banks, brokerages, insurers, carriers, airlines,
+retailers, government). Choose packs in `config.json`:
+```json
+"domain_packs": ["global", "in", "us"]
+```
+Trim to just your region (e.g. `["global", "us"]`), or add your own
+`domains/<region>.json` and list it here. Later packs win on conflict.
+
+Mail from consumer webmail (gmail, yahoo, rediffmail, outlook, ...) is **skipped**
+by `suggest` — it's treated as personal mail from real people, not bulk-labeled.
+Edit the `personal_webmail` list in `config.json` to taste.
 
 ## AI category generation (optional)
 `suggest` works with no API keys using keyword heuristics. If you'd rather have an
@@ -116,4 +139,4 @@ mapping, and creates the filters via the API. With `--label-existing`, it search
 each category's query and applies labels to matching messages with `batchModify`.
 
 ## License
-Do whatever you like; no warranty. 😆
+MIT — do whatever you like; no warranty. 😆
