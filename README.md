@@ -91,4 +91,4 @@ mapping, and creates the filters via the API. With `--label-existing`, it search
 each category's query and applies labels to matching messages with `batchModify`.
 
 ## License
-MIT — do whatever you like; no warranty.
+MIT — do whatever you like; no warranty. 😆
