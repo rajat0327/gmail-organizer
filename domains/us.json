@@ -1,0 +1,18 @@
+{
+  "_comment": "US domain knowledge pack. category -> [known sender domains]. Suffix-matched (alerts.chase.com covers chase.com). Holds US-specific institutions; universal brands (PayPal, Amazon.com, Netflix, GitHub, etc.) live in global.json. Consumer webmail is handled via config 'personal_webmail'.",
+
+  "Finance/Banking":     ["chase.com", "bankofamerica.com", "wellsfargo.com", "citi.com", "citibank.com", "capitalone.com", "usbank.com", "pnc.com", "truist.com", "tdbank.com", "ally.com", "discover.com", "americanexpress.com", "amex.com", "navyfederal.org", "usaa.com", "53.com", "fifththird.com", "regions.com", "keybank.com", "mtb.com", "huntington.com", "citizensbank.com", "sofi.com", "chime.com", "marcus.com", "synchronybank.com", "barclaycardus.com"],
+  "Finance/Investments": ["fidelity.com", "schwab.com", "vanguard.com", "etrade.com", "robinhood.com", "tdameritrade.com", "merrilledge.com", "morganstanley.com", "edwardjones.com", "wealthfront.com", "betterment.com", "coinbase.com", "kraken.com", "gemini.com", "webull.com", "public.com", "m1.com", "tradingview.com", "fundrise.com"],
+  "Finance/Payments":    ["venmo.com", "cash.app", "zellepay.com", "affirm.com", "klarna.com"],
+  "Finance/Insurance":   ["geico.com", "statefarm.com", "progressive.com", "allstate.com", "libertymutual.com", "nationwide.com", "farmers.com", "aetna.com", "cigna.com", "uhc.com", "unitedhealthcare.com", "humana.com", "kaiserpermanente.org", "anthem.com", "metlife.com", "prudential.com", "esurance.com"],
+  "Government":          ["irs.gov", "ssa.gov", "usps.com", "uscis.gov", "state.gov", "dhs.gov", "va.gov", "studentaid.gov", "healthcare.gov", "medicare.gov", "ftc.gov", "dmv.org", "id.me", "login.gov"],
+  "Travel":              ["delta.com", "united.com", "aa.com", "southwest.com", "jetblue.com", "alaskaair.com", "spirit.com", "flyfrontier.com", "hawaiianairlines.com", "marriott.com", "hilton.com", "hyatt.com", "ihg.com", "choicehotels.com", "wyndhamhotels.com", "enterprise.com", "hertz.com", "avis.com", "amtrak.com"],
+  "Shopping":            ["costco.com", "homedepot.com", "lowes.com", "macys.com", "kohls.com", "nordstrom.com", "wayfair.com", "chewy.com", "walgreens.com", "cvs.com", "samsclub.com", "gap.com", "oldnavy.com", "ulta.com", "sephora.com", "newegg.com", "overstock.com", "qvc.com"],
+  "Food":                ["doordash.com", "ubereats.com", "grubhub.com", "instacart.com", "postmates.com", "seamless.com", "opentable.com", "starbucks.com", "chipotle.com", "dominos.com", "kroger.com", "wholefoodsmarket.com"],
+  "Entertainment":       ["hbomax.com", "max.com", "peacocktv.com", "paramountplus.com", "pandora.com", "siriusxm.com", "audible.com", "ticketmaster.com", "stubhub.com", "fandango.com", "amctheatres.com", "espn.com"],
+  "Utilities":           ["verizon.com", "att.com", "t-mobile.com", "comcast.com", "xfinity.com", "spectrum.com", "cox.com", "centurylink.com", "dish.com", "directv.com", "frontier.com", "pge.com", "coned.com", "duke-energy.com", "nationalgrid.com", "xcelenergy.com"],
+  "Work":                ["salesforce.com", "servicenow.com", "oracle.com", "sap.com", "adobe.com", "concur.com", "gusto.com", "rippling.com", "bamboohr.com", "smartsheet.com"],
+  "Career":              ["ziprecruiter.com", "monster.com", "dice.com", "handshake.com", "builtin.com"],
+  "News":                ["nytimes.com", "wsj.com", "washingtonpost.com", "cnn.com", "nbcnews.com", "foxnews.com", "bloomberg.com", "reuters.com", "apnews.com", "usatoday.com", "npr.org", "theatlantic.com", "forbes.com", "businessinsider.com", "politico.com"],
+  "Education":           ["instructure.com", "blackboard.com", "gradescope.com", "chegg.com", "quizlet.com", "brainly.com"]
+}

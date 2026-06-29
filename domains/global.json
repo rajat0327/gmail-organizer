@@ -1,0 +1,14 @@
+{
+  "_comment": "Global domain knowledge pack. category -> [known sender domains]. Used by 'suggest' (offline). Domains are suffix-matched, so subdomains like alerts.paypal.com are covered automatically. Contributions welcome.",
+
+  "Work":          ["slack.com", "github.com", "gitlab.com", "atlassian.net", "atlassian.com", "notion.so", "asana.com", "zoom.us", "figma.com", "trello.com", "monday.com", "clickup.com", "linear.app", "dropbox.com", "box.com", "docusign.net", "calendly.com"],
+  "Cloud":         ["amazonaws.com", "azure.com", "cloud.google.com", "digitalocean.com", "heroku.com", "cloudflare.com", "vercel.com", "netlify.com", "mongodb.com", "datadoghq.com"],
+  "Finance":       ["paypal.com", "stripe.com", "wise.com", "revolut.com", "payoneer.com", "intuit.com", "quickbooks.com"],
+  "Shopping":      ["amazon.com", "ebay.com", "etsy.com", "aliexpress.com", "walmart.com", "target.com", "bestbuy.com", "shopify.com"],
+  "Travel":        ["booking.com", "airbnb.com", "expedia.com", "hotels.com", "uber.com", "lyft.com", "tripadvisor.com", "kayak.com", "skyscanner.net"],
+  "Social":        ["facebookmail.com", "x.com", "twitter.com", "instagram.com", "pinterest.com", "reddit.com", "tiktok.com", "discord.com", "snapchat.com", "meetup.com"],
+  "Newsletters":   ["substack.com", "medium.com", "mailchimp.com", "beehiiv.com", "ghost.io", "mailerlite.com"],
+  "Career":        ["linkedin.com", "indeed.com", "glassdoor.com", "glassdoor.co.in", "upwork.com", "fiverr.com", "toptal.com", "freelancer.com", "leetcode.com", "hackerrank.com", "hackerearth.com", "wellfound.com", "greenhouse.io", "lever.co", "workday.com"],
+  "Entertainment": ["netflix.com", "spotify.com", "youtube.com", "primevideo.com", "disneyplus.com", "hulu.com", "twitch.tv"],
+  "Education":     ["coursera.org", "udemy.com", "edx.org", "khanacademy.org", "duolingo.com", "udacity.com", "educative.io", "pluralsight.com"]
+}

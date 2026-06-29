@@ -92,6 +92,43 @@ def load_config():
         return json.load(f)
 
 
+def load_domain_kb(cfg):
+    """Load domains/<pack>.json packs into one {domain: category} map.
+    Later packs win on conflict (per config 'domain_packs' order)."""
+    kb = {}
+    packs = cfg.get("domain_packs", [])
+    base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "domains")
+    for name in packs:
+        path = os.path.join(base, f"{name}.json")
+        if not os.path.exists(path):
+            print(f"  (domain pack not found: {path})")
+            continue
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        for cat, doms in data.items():
+            if cat.startswith("_") or not isinstance(doms, list):
+                continue
+            for d in doms:
+                kb[d.lower()] = cat
+    return kb
+
+
+def kb_lookup(domain, kb):
+    """Exact match, else suffix match (alerts.hdfcbank.com -> hdfcbank.com)."""
+    d = domain.lower()
+    if d in kb:
+        return kb[d]
+    for known, cat in kb.items():
+        if d.endswith("." + known):
+            return cat
+    return None
+
+
+def is_personal_webmail(domain, webmail):
+    d = domain.lower()
+    return any(d == w or d.endswith("." + w) for w in webmail)
+
+
 def load_categories(path, cfg):
     """Account-specific mapping. Prefer the categories file; fall back to
     config['categories'] only if the file is absent. Drops helper keys and
@@ -525,22 +562,27 @@ def cmd_suggest(cfg, ai_provider=None):
         return
 
     # Heuristic path (no AI, no dependencies)
-    mapped = set()
-    for cat in cfg["categories"].values():
-        for v in cat.get("from", []):
-            mapped.add(v.lower())
+    # 1) precise domain knowledge base (offline packs), 2) keyword heuristics, 3) UNSORTED
+    kb = load_domain_kb(cfg)
+    webmail = set(w.lower() for w in cfg.get("personal_webmail", ["gmail.com"]))
     heur = cfg.get("suggest_heuristics", {})
     proposals = defaultdict(list)
+    n_kb = n_heur = n_skip = 0
     rows = list(csv.DictReader(open(SENDERS_CSV, encoding="utf-8")))
     for r in rows:
         e, d, c = r["email"].lower(), r["domain"].lower(), int(r["count"])
-        if any(m in e or m in d for m in mapped) or "gmail.com" in d:
+        if not d or is_personal_webmail(d, webmail):
+            n_skip += 1
             continue
-        chosen = None
-        for cat, kws in heur.items():
-            if any(k in e or k in d for k in kws):
-                chosen = cat.replace("Travels2", "Travels")
-                break
+        chosen = kb_lookup(d, kb)        # precise match first
+        if chosen:
+            n_kb += 1
+        else:
+            for cat, kws in heur.items():  # fuzzy keyword fallback
+                if any(k in e or k in d for k in kws):
+                    chosen = cat
+                    n_heur += 1
+                    break
         proposals[chosen or "UNSORTED"].append({"domain": d, "count": c})
     # collapse to suggested category -> {"from": [domains]} (apply-ready), dedup domains
     out = {}
@@ -554,8 +596,9 @@ def cmd_suggest(cfg, ai_provider=None):
         json.dump(out, f, indent=2)
     n_un = len(out.get("UNSORTED", {}).get("from", []))
     total = sum(len(v.get("from", [])) for v in out.values())
-    print(f"Wrote {SUGGEST_JSON}: {total} new domains across {len(out)} buckets, "
-          f"{n_un} UNSORTED.")
+    print(f"Wrote {SUGGEST_JSON}: {total} domains across {len(out)} buckets "
+          f"(matched {n_kb} by domain knowledge, {n_heur} by keyword, "
+          f"{n_un} UNSORTED; skipped {n_skip} personal/webmail).")
     print(f"Next: review it, then copy the categories you want into {CATEGORIES_PATH} "
           f"(rename/merge buckets, delete UNSORTED), and run 'apply'.")
 

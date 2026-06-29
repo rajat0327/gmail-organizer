@@ -194,5 +194,38 @@
       "openai": "gpt-4o-mini"
     },
     "_note": "Optional. 'suggest --ai' groups senders via an LLM. Needs an API key in env: ANTHROPIC_API_KEY / GEMINI_API_KEY / OPENAI_API_KEY. Only sender domains + counts are sent, never email content, names, or your address. Update model names here as providers release new ones."
-  }
+  },
+  "domain_packs": [
+    "global",
+    "in",
+    "us"
+  ],
+  "_domain_packs_note": "Offline domain knowledge files loaded from domains/<name>.json, in order (later packs win on conflict). Trim to your region (e.g. just ['global']) or add your own pack. Used by 'suggest' for precise category matching before keyword heuristics.",
+  "personal_webmail": [
+    "gmail.com",
+    "googlemail.com",
+    "yahoo.com",
+    "yahoo.co.in",
+    "yahoo.in",
+    "outlook.com",
+    "hotmail.com",
+    "live.com",
+    "msn.com",
+    "icloud.com",
+    "me.com",
+    "aol.com",
+    "proton.me",
+    "protonmail.com",
+    "zoho.com",
+    "zoho.in",
+    "rediffmail.com",
+    "sify.com",
+    "vsnl.com",
+    "vsnl.net",
+    "in.com",
+    "airtelmail.in",
+    "lycos.in",
+    "mailme.ae"
+  ],
+  "_personal_webmail_note": "Senders from these consumer webmail domains are SKIPPED by 'suggest' (treated as personal mail from real people, like gmail). Add or remove as you like."
 }
