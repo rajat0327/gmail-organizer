@@ -1,0 +1,18 @@
+# Secrets & credentials — NEVER commit
+credentials.json
+token.json
+client_secret*.json
+
+# Your personal data — keep private
+categories.json
+senders.csv
+summary.txt
+suggested_categories.json
+audit_*.csv
+audit_*.txt
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/

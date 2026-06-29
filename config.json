@@ -1,0 +1,187 @@
+{
+  "_comment": "Generic Gmail organizer config. Edit categories for any account. Run: python gmail_organizer.py --help",
+  "settings": {
+    "max_scan_messages": 0,
+    "include_spam_trash": false,
+    "list_page_size": 500,
+    "batch_modify_size": 1000,
+    "dry_run": true,
+    "create_filters": true,
+    "label_existing": false,
+    "existing_limit": 0,
+    "archive_non_inbox": false,
+    "rate_limit_sleep": 1.0
+  },
+  "_settings_help": {
+    "max_scan_messages": "0 = all, used by 'audit'",
+    "dry_run": "true = print what WOULD happen, change nothing. Set false to act.",
+    "create_filters": "create labels + filters via API on 'apply'",
+    "label_existing": "also apply labels to existing mail on 'apply'",
+    "existing_limit": "0 = all matching; or cap per category for a safe test run",
+    "archive_non_inbox": "if true, categories NOT in inbox_only_labels also skip the inbox (remove INBOX)",
+    "rate_limit_sleep": "seconds to back off on 429"
+  },
+  "inbox_only_labels": [
+    "Me",
+    "Bill",
+    "Attachments"
+  ],
+  "bill": {
+    "label": "Bill",
+    "star": true,
+    "mark_important": true,
+    "never_spam": true,
+    "subject_any": [
+      "minimum amount due",
+      "total amount due",
+      "amount due",
+      "credit card statement",
+      "card statement",
+      "statement is ready",
+      "e-statement",
+      "monthly statement",
+      "EMI due",
+      "your EMI",
+      "premium due",
+      "policy renewal",
+      "outstanding amount",
+      "bill generated",
+      "your bill for",
+      "bill for the month",
+      "due for payment"
+    ],
+    "from_not": [
+      "ubereats.com",
+      "doordash.com",
+      "grubhub.com",
+      "amazon.com",
+      "ebay.com"
+    ],
+    "exclude_from_categories": [
+      "Finance",
+      "Shopping",
+      "Subscriptions"
+    ],
+    "enabled": true,
+    "_note": "Generic bill keeper. enabled:false to skip. from_not = senders whose 'payment' mails are NOT bills."
+  },
+  "categories": {},
+  "_suggest_heuristics_help": "Used by 'suggest' to auto-propose a category for NEW/unknown senders. First keyword found in the sender's email/domain wins.",
+  "suggest_heuristics": {
+    "Cloud": [
+      "aws",
+      "amazonaws",
+      "azure",
+      "gcp",
+      "cloud",
+      "digitalocean",
+      "heroku",
+      "cloudflare",
+      "vercel",
+      "netlify"
+    ],
+    "Work": [
+      "slack",
+      "github",
+      "gitlab",
+      "atlassian",
+      "jira",
+      "notion",
+      "asana",
+      "zoom",
+      "figma"
+    ],
+    "Finance": [
+      "bank",
+      "card",
+      "paypal",
+      "stripe",
+      "wise",
+      "revolut",
+      "loan",
+      "invoice",
+      "statement",
+      "insurance",
+      "tax",
+      "mutualfund",
+      "brokerage"
+    ],
+    "Career": [
+      "job",
+      "career",
+      "hiring",
+      "recruit",
+      "linkedin",
+      "indeed",
+      "glassdoor",
+      "greenhouse",
+      "lever",
+      "workday"
+    ],
+    "Shopping": [
+      "amazon",
+      "ebay",
+      "etsy",
+      "shop",
+      "store",
+      "cart",
+      "order",
+      "aliexpress",
+      "walmart",
+      "target"
+    ],
+    "Travel": [
+      "flight",
+      "airline",
+      "booking",
+      "airbnb",
+      "expedia",
+      "hotel",
+      "travel",
+      "trip",
+      "uber",
+      "lyft",
+      "train"
+    ],
+    "Food": [
+      "ubereats",
+      "doordash",
+      "grubhub",
+      "food",
+      "grocery",
+      "restaurant",
+      "delivery"
+    ],
+    "Social": [
+      "facebook",
+      "instagram",
+      "twitter",
+      "x.com",
+      "snapchat",
+      "youtube",
+      "pinterest",
+      "reddit",
+      "tiktok",
+      "discord"
+    ],
+    "Newsletters": [
+      "substack",
+      "medium",
+      "newsletter",
+      "digest",
+      "mailchimp",
+      "beehiiv"
+    ],
+    "Study": [
+      "udemy",
+      "coursera",
+      "edx",
+      "khanacademy",
+      "learn",
+      "course",
+      "duolingo"
+    ]
+  },
+  "_categories_note": "Account categories live in categories.json (generate via 'suggest', then edit). This stays empty on purpose.",
+  "_about": "Generic config-driven Gmail organizer. Edit categories.json (per account); this file is the reusable engine."
+}

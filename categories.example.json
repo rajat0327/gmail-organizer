@@ -1,0 +1,17 @@
+{
+  "_comment": "EXAMPLE mapping with placeholder senders. Copy to categories.json and edit for your account, or run 'suggest' to auto-generate from your inbox. Nested labels use '/'. Matchers: from, subject_any, subject_not, from_not, raw_query.",
+
+  "Work":        { "from": ["yourcompany.com", "slack.com", "github.com", "atlassian.net"] },
+  "Finance":     { "from": ["paypal.com", "stripe.com", "yourbank.com"] },
+  "Shopping":    { "from": ["amazon.com", "ebay.com", "etsy.com"] },
+  "Travel":      { "from": ["booking.com", "airbnb.com", "expedia.com"] },
+  "Social":      { "from": ["facebookmail.com", "x.com", "linkedin.com", "instagram.com"] },
+  "Newsletters": { "from": ["substack.com", "medium.com"] },
+  "Cloud":       { "from": ["amazonaws.com", "azure.com", "cloud.google.com"] },
+
+  "Tickets":     { "subject_any": ["PNR", "boarding pass", "e-ticket", "booking confirmed", "your itinerary"], "subject_not": ["offer", "sale", "deal"] },
+  "Attachments": { "raw_query": "has:attachment -category:promotions -category:social -in:spam -in:trash" },
+
+  "_Me_example": "Add a self-mail label by uncommenting a line like the next one with YOUR address(es):",
+  "Me":          { "from": ["your-address@gmail.com"] }
+}
